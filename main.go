@@ -2,16 +2,21 @@ package main
 
 import (
 	"fmt"
+	"os"
 	"netLogin/utils"
 	"regexp"
+	"strings"
 	"time"
 
 	"github.com/go-toast/toast"
 )
 
 func main() {
-	username := "16696682230"
-	password := "654321"
+	content, _ := os.ReadFile("config.ncwu")
+	config := string(content)
+	info := strings.Split(config, ",")
+	username := info[0]
+	password := info[1]
 
 	// ip
 	params := make(map[string]string)
@@ -48,7 +53,7 @@ func main() {
 	chkstr += token + "1"
 	chkstr += token + infoEncrypt
 	chksumEncrypt := utils.Sha1(chkstr)
-	
+
 	// 发送登录包
 	params["action"] = "login"
 	params["password"] = "{MD5}" + passwordEncrypt
@@ -61,14 +66,15 @@ func main() {
 	params["name"] = "Windows"
 	params["double_stack"] = "0"
 	resp = utils.Get("http://192.168.0.170/cgi-bin/srun_portal", params)
-	
+
 	// 显示通知
 	compileRegex = regexp.MustCompile(`suc_msg":"(.*?)",`)
 	matchArr = compileRegex.FindStringSubmatch(resp)
 	suc_msg := matchArr[len(matchArr)-1]
 	notification := toast.Notification{
-		AppID:   "Microsoft.Windows.Shell.RunDialog",
-		Title:   "华北水利水电大学校园网认证状态",
+		AppID:   "netLogin",
+		Title:   "华北水利水电大学校园网认证状态😘",
+		Icon: "C:\\Users\\admin\\Desktop\\文学\\golang\\favicon.ico",
 		Message: suc_msg,
 	}
 	notification.Push()
