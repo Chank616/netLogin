@@ -2,19 +2,18 @@ package main
 
 import (
 	"fmt"
-	"os"
 	"netLogin/utils"
+	"os"
 	"regexp"
 	"strings"
 	"time"
-
 	"github.com/go-toast/toast"
 )
 
 func main() {
 	content, _ := os.ReadFile("config.ncwu")
 	config := string(content)
-	info := strings.Split(config, ",")
+	info:= strings.Split(config, ",")
 	username := info[0]
 	password := info[1]
 
@@ -24,6 +23,15 @@ func main() {
 	params["callback"] = "jQuery112406336369815771166_" + now
 	params["_"] = now
 	resp := utils.Get("http://192.168.0.170/cgi-bin/rad_user_info", params)
+	if resp == "超时无法访问" {
+		notification := toast.Notification{
+			AppID:   "NetLoginNCWU",
+			Title:   "华北水利水电大学校园网认证状态😘",
+			Message: "连接失败喵😭！可能是：\n1.校园网繁忙😃\n2.未设置自动连接😃\n3.看东西代理没关😃\n关注永雏塔菲喵，关注永雏塔菲谢谢喵！",
+		}
+		notification.Push()
+		return
+	}
 	compileRegex := regexp.MustCompile(`online_ip":"(.*?)",`)
 	matchArr := compileRegex.FindStringSubmatch(resp)
 	ip := matchArr[len(matchArr)-1]
@@ -66,16 +74,28 @@ func main() {
 	params["name"] = "Windows"
 	params["double_stack"] = "0"
 	resp = utils.Get("http://192.168.0.170/cgi-bin/srun_portal", params)
-
+	print(resp)
 	// 显示通知
+	compileRegex = regexp.MustCompile(`error_msg":"(.*?)",`)
+	matchArr = compileRegex.FindStringSubmatch(resp)
+	error_msg := matchArr[len(matchArr)-1]
+	if error_msg != "" {
+		notification := toast.Notification{
+			AppID:   "NetLoginNCWU",
+			Title:   "华北水利水电大学校园网认证状态😘",
+			Message: "连接失败喵😭！\n" + "状态码: " + error_msg + "\n关注永雏塔菲喵，关注永雏塔菲谢谢喵！",
+		}
+		notification.Push()
+		return
+	}
 	compileRegex = regexp.MustCompile(`suc_msg":"(.*?)",`)
 	matchArr = compileRegex.FindStringSubmatch(resp)
 	suc_msg := matchArr[len(matchArr)-1]
 	notification := toast.Notification{
-		AppID:   "netLogin",
+		AppID:   "NetLoginNCWU",
 		Title:   "华北水利水电大学校园网认证状态😘",
-		Icon: "C:\\Users\\admin\\Desktop\\文学\\golang\\favicon.ico",
-		Message: suc_msg,
+		Message: "连接成功喵😎！\n" + "状态码: " + suc_msg + "\n关注永雏塔菲喵，关注永雏塔菲谢谢喵！",
 	}
 	notification.Push()
+
 }
