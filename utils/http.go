@@ -17,7 +17,7 @@ func Get(addr string, param map[string]string) string {
 	urlPath := Url.String()
 	resp, err := http.Get(urlPath)
 	if err != nil {
-		return ""
+		return "超时无法访问"
 	}
 	defer resp.Body.Close()
 	body, _ := io.ReadAll(resp.Body)
